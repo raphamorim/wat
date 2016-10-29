@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"gopkg.in/fsnotify.v1"
 	"log"
 )
@@ -29,9 +30,9 @@ func (w *wat) startWatch() {
 		for {
 			select {
 			case event := <-watcher.Events:
-				log.Println("event:", event)
+				fmt.Println(event)
 				if event.Op&fsnotify.Write == fsnotify.Write {
-					log.Println("modified file:", event.Name)
+					fmt.Println(event.Name)
 				}
 			case err := <-watcher.Errors:
 				log.Println("error:", err)
