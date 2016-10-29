@@ -34,11 +34,13 @@ func (w *wat) startWatch() {
 			case event := <-watcher.Events:
 				// fmt.Println(event.Op)
 				if event.Op&fsnotify.Chmod == fsnotify.Chmod {
-					out, err := exec.Command(w.exec).Output()
-					if err != nil {
-						log.Fatal(err)
-					}
-					fmt.Printf("%s\n", out)
+					go func() {
+						out, err := exec.Command(w.exec).Output()
+						if err != nil {
+							log.Fatal(err)
+						}
+						fmt.Printf("%s\n", out)
+					}()
 				}
 				if event.Op&fsnotify.Write == fsnotify.Write {
 					fmt.Println(event.Name)
