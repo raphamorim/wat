@@ -1,10 +1,11 @@
 package main
 
 import (
+	"bufio"
 	"fmt"
 	"gopkg.in/fsnotify.v1"
-	"io/ioutil"
 	"log"
+	"os"
 	"os/exec"
 )
 
@@ -27,7 +28,7 @@ func (w *wat) startWatch() {
 	}
 	defer watcher.Close()
 
-	fmt.Println("Waiting changes...")
+	fmt.Println("Waiting...")
 	done := make(chan bool)
 	go func() {
 		for {
@@ -38,17 +39,24 @@ func (w *wat) startWatch() {
 					go func() {
 						cmd := exec.Command(w.exec)
 						out, err := cmd.StdoutPipe()
-						if err := cmd.Start(); err != nil {
-							log.Fatal(err)
-						}
 						if err != nil {
 							log.Fatal(err)
 						}
-						grepBytes, _ := ioutil.ReadAll(out)
+
+						scanner := bufio.NewScanner(out)
+						go func() {
+							for scanner.Scan() {
+								fmt.Printf("%s\n", scanner.Text())
+							}
+						}()
+						if err := cmd.Start(); err != nil {
+							log.Fatal(err)
+							os.Exit(1)
+						}
 						if err := cmd.Wait(); err != nil {
 							log.Fatal(err)
+							os.Exit(1)
 						}
-						fmt.Printf("%s\n", string(grepBytes))
 					}()
 				}
 				if event.Op&fsnotify.Write == fsnotify.Write {
