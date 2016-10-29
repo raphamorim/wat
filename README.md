@@ -27,7 +27,7 @@ wat src/ date
 Returns for every file update inside `src` folder:
 
 ```
-Waiting changes...
+Waiting...
 Sat Oct 29 15:34:23 BRST 2016
 ```
 
