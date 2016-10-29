@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"gopkg.in/fsnotify.v1"
+	"io/ioutil"
 	"log"
 	"os/exec"
 )
@@ -35,11 +36,19 @@ func (w *wat) startWatch() {
 				// fmt.Println(event.Op)
 				if event.Op&fsnotify.Chmod == fsnotify.Chmod {
 					go func() {
-						out, err := exec.Command(w.exec).Output()
+						cmd := exec.Command(w.exec)
+						out, err := cmd.StdoutPipe()
+						if err := cmd.Start(); err != nil {
+							log.Fatal(err)
+						}
 						if err != nil {
 							log.Fatal(err)
 						}
-						fmt.Printf("%s\n", out)
+						grepBytes, _ := ioutil.ReadAll(out)
+						if err := cmd.Wait(); err != nil {
+							log.Fatal(err)
+						}
+						fmt.Printf("%s\n", string(grepBytes))
 					}()
 				}
 				if event.Op&fsnotify.Write == fsnotify.Write {
