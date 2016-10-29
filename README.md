@@ -31,6 +31,12 @@ Waiting changes...
 Sat Oct 29 15:34:23 BRST 2016
 ```
 
+## Comparison
+
+wat vs [grunt-contrib-watch](https://github.com/gruntjs/grunt-contrib-watch)
+
+![wat vs grunt-contrib-watch](./images/example.gif)
+
 ## FAQs
 
 #### EMFILE: Too many opened files.?
