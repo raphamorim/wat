@@ -29,11 +29,13 @@ func newWatch(path, command string, args []string, stdout io.Writer) (*watch, er
 			select {
 			case event := <-watcher.Events:
 				if event.Op&fsnotify.Chmod == fsnotify.Chmod {
-					cmd := exec.Command(command, args...)
-					cmd.Stdout = stdout
-					if err = cmd.Run(); err != nil {
-						log.Println(err)
-					}
+					go func() {
+						cmd := exec.Command(command, args...)
+						cmd.Stdout = stdout
+						if err = cmd.Run(); err != nil {
+							log.Println(err)
+						}
+					}()
 				}
 			case err = <-watcher.Errors:
 				log.Println("error:", err)
