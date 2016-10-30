@@ -1,51 +1,38 @@
 package main
 
 import (
-	"bufio"
 	"fmt"
 	"gopkg.in/fsnotify.v1"
 	"io"
 	"log"
-	"os"
 	"os/exec"
 )
 
-func startWatch(path, command string) {
+type watch struct {
+	watcher *fsnotify.Watcher
+}
+
+func (w *watch) close() error {
+	return w.watcher.Close()
+}
+
+func newWatch(path, command string, stdout io.Writer) (*watch, error) {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
-	defer watcher.Close()
 
-	fmt.Println("Waiting...")
-	done := make(chan bool)
+	fmt.Fprintln(stdout, "Waiting...")
 	go func(watcher *fsnotify.Watcher, command string) {
 		for {
 			select {
 			case event := <-watcher.Events:
 				if event.Op&fsnotify.Chmod == fsnotify.Chmod {
-					go func() {
-						cmd := exec.Command(command)
-						var out io.ReadCloser
-						out, err = cmd.StdoutPipe()
-						if err != nil {
-							log.Fatal(err)
-						}
-
-						scanner := bufio.NewScanner(out)
-						go func() {
-							for scanner.Scan() {
-								fmt.Printf("%s\n", scanner.Text())
-							}
-						}()
-						if err = cmd.Run(); err != nil {
-							log.Fatal(err)
-							os.Exit(1)
-						}
-					}()
-				}
-				if event.Op&fsnotify.Write == fsnotify.Write {
-					fmt.Println(event.Name)
+					cmd := exec.Command(command)
+					cmd.Stdout = stdout
+					if err = cmd.Run(); err != nil {
+						log.Println(err)
+					}
 				}
 			case err = <-watcher.Errors:
 				log.Println("error:", err)
@@ -55,7 +42,7 @@ func startWatch(path, command string) {
 
 	err = watcher.Add(path)
 	if err != nil {
-		log.Fatal(err)
+		return nil, err
 	}
-	<-done
+	return &watch{watcher}, nil
 }
