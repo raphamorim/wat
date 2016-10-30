@@ -12,7 +12,7 @@ func main() {
 		os.Exit(2)
 	}
 
-	w, err := newWatch(os.Args[1], os.Args[2], os.Stdout)
+	w, err := newWatch(os.Args[1], os.Args[2], os.Args[3:], os.Stdout)
 	if err != nil {
 		log.Fatal(err)
 	}
