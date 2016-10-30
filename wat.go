@@ -2,10 +2,11 @@ package main
 
 import (
 	"fmt"
-	"gopkg.in/fsnotify.v1"
 	"io"
 	"log"
 	"os/exec"
+
+	"gopkg.in/fsnotify.v1"
 )
 
 type watch struct {
@@ -16,7 +17,7 @@ func (w *watch) close() error {
 	return w.watcher.Close()
 }
 
-func newWatch(path, command string, stdout io.Writer) (*watch, error) {
+func newWatch(path, command string, args []string, stdout io.Writer) (*watch, error) {
 	watcher, err := fsnotify.NewWatcher()
 	if err != nil {
 		return nil, err
@@ -28,7 +29,7 @@ func newWatch(path, command string, stdout io.Writer) (*watch, error) {
 			select {
 			case event := <-watcher.Events:
 				if event.Op&fsnotify.Chmod == fsnotify.Chmod {
-					cmd := exec.Command(command)
+					cmd := exec.Command(command, args...)
 					cmd.Stdout = stdout
 					if err = cmd.Run(); err != nil {
 						log.Println(err)
