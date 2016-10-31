@@ -1,6 +1,7 @@
 language: go
+
 go:
-  - 1.3
+  - 1.7.3
   - master
 script: go get -u github.com/raphamorim/wat
 notifications:
