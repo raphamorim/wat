@@ -1,0 +1,10 @@
+language: go
+
+go:
+  - 1.7.3
+  - tip
+script: go get -u github.com/raphamorim/wat
+notifications:
+  email:
+    on_success: change
+    on_failure: always
