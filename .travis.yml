@@ -2,7 +2,7 @@ language: go
 
 go:
   - 1.7.3
-  - master
+  - tip
 script: go get -u github.com/raphamorim/wat
 notifications:
   email:
